@@ -1,0 +1,38 @@
+{
+  "_summary": {
+    "feature": "Chunked Prefill",
+    "tokens_per_sec": 713.0
+  },
+  "chunk_results": [
+    {
+      "elapsed_s": 1.12,
+      "total_tokens": 798,
+      "tokens_per_sec": 713.0,
+      "config": "No Chunking\n(default)"
+    },
+    {
+      "elapsed_s": 1.12,
+      "total_tokens": 798,
+      "tokens_per_sec": 713.0,
+      "config": "Chunk\n512 tok"
+    },
+    {
+      "elapsed_s": 1.12,
+      "total_tokens": 797,
+      "tokens_per_sec": 712.0,
+      "config": "Chunk\n1024 tok"
+    },
+    {
+      "elapsed_s": 1.12,
+      "total_tokens": 798,
+      "tokens_per_sec": 713.0,
+      "config": "Chunk\n2048 tok"
+    },
+    {
+      "elapsed_s": 1.12,
+      "total_tokens": 797,
+      "tokens_per_sec": 712.0,
+      "config": "Chunk\n4096 tok"
+    }
+  ]
+}

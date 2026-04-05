@@ -1,0 +1,26 @@
+{
+  "_summary": {
+    "feature": "Multi-LoRA",
+    "tokens_per_sec": 715.0
+  },
+  "lora_results": {
+    "no_lora": {
+      "elapsed_s": 1.426,
+      "total_tokens": 1024,
+      "tokens_per_sec": 718.0
+    },
+    "lora_infra": {
+      "elapsed_s": 1.432,
+      "total_tokens": 1024,
+      "tokens_per_sec": 715.0
+    },
+    "with_adapter": {
+      "elapsed_s": 1.433,
+      "total_tokens": 1024,
+      "tokens_per_sec": 714.0
+    },
+    "lora_mem_gb": 0.0,
+    "adapter_loaded": true
+  },
+  "lora_success": true
+}

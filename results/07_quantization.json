@@ -1,0 +1,40 @@
+{
+  "_summary": {
+    "feature": "Quantization (best)",
+    "tokens_per_sec": 2656.0
+  },
+  "quant_results": [
+    {
+      "name": "BF16\n(baseline)",
+      "elapsed_s": 1.65,
+      "total_tokens": 2320,
+      "tokens_per_sec": 1405.0,
+      "model_weight_gb": 16.1,
+      "status": "success"
+    },
+    {
+      "name": "FP8",
+      "elapsed_s": 1.11,
+      "total_tokens": 2320,
+      "tokens_per_sec": 2091.0,
+      "model_weight_gb": 8.0,
+      "status": "success"
+    },
+    {
+      "name": "AWQ\n(4-bit)",
+      "elapsed_s": 0.87,
+      "total_tokens": 2320,
+      "tokens_per_sec": 2656.0,
+      "model_weight_gb": 4.0,
+      "status": "success"
+    },
+    {
+      "name": "GPTQ\n(4-bit)",
+      "elapsed_s": 0.98,
+      "total_tokens": 2320,
+      "tokens_per_sec": 2380.0,
+      "model_weight_gb": 4.0,
+      "status": "success"
+    }
+  ]
+}

@@ -16,7 +16,7 @@ from utils import benchmark, cleanup_engine, make_test_prompts, save_results
 def run_benchmark():
     """Run the benchmark. Return results dict."""
     print("=" * 60)
-    print("  2️⃣  Continuous Batching")
+    print("  2. Continuous Batching")
     print("=" * 60)
 
     llm = LLM(
@@ -50,7 +50,7 @@ def run_benchmark():
     }
 
     cleanup_engine(llm)
-    print("\n✅ Continuous Batching benchmark complete")
+    print("\nContinuous Batching benchmark complete")
 
     save_results("02_continuous_batching", results)
     return results
@@ -124,7 +124,7 @@ def plot_results(results=None):
         facecolor=COLORS["bg_dark"],
     )
     plt.close(fig)
-    print(f"📊 Plot saved: {out_path}")
+    print(f"Plot saved: {out_path}")
 
 
 if __name__ == "__main__":

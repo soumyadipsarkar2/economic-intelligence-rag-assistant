@@ -18,10 +18,10 @@ def ensure_hf_login():
         from huggingface_hub import login
 
         login(token=token, add_to_git_credential=False)
-        print("✅ Authenticated with HuggingFace")
+        print("Authenticated with HuggingFace")
     else:
         print(
-            "⚠️  No HF token in environment. "
+            "Warning: No HF token in environment. "
             "Set HF_TOKEN or HUGGING_FACE_HUB_TOKEN for gated models."
         )
 
@@ -271,4 +271,4 @@ def filter_quant_configs(methods_csv: str):
     if filtered:
         QUANT_CONFIGS = filtered
     else:
-        print("⚠️  --quant-methods matched no configs; keeping full QUANT_CONFIGS.")
+        print("Warning: --quant-methods matched no configs; keeping full QUANT_CONFIGS.")

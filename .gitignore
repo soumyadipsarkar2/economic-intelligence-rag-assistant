@@ -12,7 +12,28 @@ venv/
 *.safetensors
 *.pt
 .cache/
+
+# Local benchmark outputs (ignore by default)
 results/*.json
 plots/*.png
 !results/.gitkeep
 !plots/.gitkeep
+
+# Committed sample run (A100 / Llama-3.1-8B) for README + dashboard demo
+!results/01_paged_attention.json
+!results/02_continuous_batching.json
+!results/03_prefix_caching.json
+!results/04_chunked_prefill.json
+!results/05_cuda_graphs.json
+!results/06_speculative_decoding.json
+!results/07_quantization.json
+!results/08_multi_lora.json
+!plots/plot_01_paged_attention.png
+!plots/plot_02_continuous_batching.png
+!plots/plot_03_prefix_caching.png
+!plots/plot_04_chunked_prefill.png
+!plots/plot_05_cuda_graphs.png
+!plots/plot_06_speculative_decoding.png
+!plots/plot_07_quantization.png
+!plots/plot_08_multi_lora.png
+!plots/vllm_benchmark_linkedin.png

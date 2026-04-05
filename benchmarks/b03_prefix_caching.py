@@ -76,7 +76,7 @@ def run_benchmark():
     }
 
     speedup = res_no_cache_2["elapsed_s"] / max(res_cache_2["elapsed_s"], 1e-6)
-    print(f"\n   🚀 Warm cache speedup: {speedup:.2f}x")
+    print(f"\n   Warm cache speedup: {speedup:.2f}x")
 
     results = {
         "_summary": {

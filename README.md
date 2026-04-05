@@ -4,6 +4,25 @@ Modular benchmarks and plots for eight major [vLLM](https://github.com/vllm-proj
 
 **Requirements:** NVIDIA GPU (tested on A100 80GB), Python 3.10+, Hugging Face access for gated Llama weights.
 
+## Results and plots
+
+Example run: **Llama-3.1-8B-Instruct** on **A100 80GB** (vLLM ~0.19). Full tables and all eight feature figures plus the combined dashboard live in **[docs/RESULTS.md](docs/RESULTS.md)**. The same PNGs are in **`plots/`** (committed samples; benchmarks write there too).
+
+### Throughput at a glance
+
+| Feature | Peak tok/s |
+|---------|------------|
+| Continuous batching | 7,058 |
+| PagedAttention | 4,088 |
+| Quantization (AWQ best) | 2,656 |
+| CUDA graphs | 1,407 |
+| Speculative decoding (baseline) | 729 |
+| Prefix caching (APC warm) | 719 |
+| Multi-LoRA | 715 |
+| Chunked prefill | 713 |
+
+![Combined benchmark dashboard](plots/vllm_benchmark_linkedin.png)
+
 ## Authentication
 
 ```bash
@@ -97,10 +116,11 @@ python run_all.py --plot-only
 | `config.py` | Model IDs, GPU settings, dark/light plot themes, quantization table |
 | `utils.py` | Engine cleanup, timing, `save_results` / `load_results` |
 | `benchmarks/b0X_*.py` | One feature each: `run_benchmark()` + `plot_results()` |
-| `results/*.json` | Serialized metrics (gitignored except `.gitkeep`) |
-| `plots/*.png` | Per-feature charts + `vllm_benchmark_linkedin.png` |
+| `results/*.json` | Serialized metrics; **sample** `01_`…`08_*.json` are committed; new runs overwrite locally |
+| `plots/*.png` | Per-feature charts + `vllm_benchmark_linkedin.png`; **sample** PNGs committed; regenerate with benchmarks |
 | `docs/FEATURES.md` | Short explanation of each benchmark |
 | `docs/TROUBLESHOOTING.md` | Common vLLM 0.19.x issues and fixes |
+| `docs/RESULTS.md` | Sample metrics + figures linked from `plots/` |
 
 ## License
 

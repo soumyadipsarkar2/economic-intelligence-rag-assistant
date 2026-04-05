@@ -130,7 +130,7 @@ def benchmark(
 
     if label:
         print(
-            f"   ✅ {label}: {med_time:.3f}s median | "
+            f"   {label}: {med_time:.3f}s median | "
             f"{med_tok} tokens | {tps:.1f} tok/s"
         )
 

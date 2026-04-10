@@ -1,127 +1,235 @@
-# vLLM Inference Profiler
+# Economic Intelligence RAG Assistant
 
-Modular benchmarks and plots for eight major [vLLM](https://github.com/vllm-project/vllm) features (PagedAttention, continuous batching, prefix caching, chunked prefill, CUDA graphs, speculative decoding, quantization, multi-LoRA). Logic is split from the original Colab workflow into `config.py`, `utils.py`, and `benchmarks/b01_*.py` … `b08_*.py`, with JSON under `results/` and PNGs under `plots/`.
+[![Built on Snowflake](https://img.shields.io/badge/Built%20on-Snowflake-29B5E8?logo=snowflake&logoColor=white)](#)
+[![Hackathon](https://img.shields.io/badge/Hackathon-TAMU%20CSEGSA%20%C3%97%20Snowflake%202026-111827)](#)
+[![Prompt](https://img.shields.io/badge/AI%20Prompt-01%20(RAG%20Economic%20Intelligence)-7C3AED)](#)
 
-**Requirements:** NVIDIA GPU (tested on A100 80GB), Python 3.10+, Hugging Face access for gated Llama weights.
+RAG-powered **economic intelligence assistant built entirely in Snowflake** using **Snowflake Cortex Search (vector retrieval)** + **Cortex LLM completion** to deliver grounded answers with source citations over economic marketplace datasets.
 
-## Results and plots
+> **Hackathon Submission**: TAMU CSEGSA × Snowflake Hackathon 2026  
+> **Track / Prompt**: AI Prompt 01 — RAG-powered economic intelligence assistant (100 pts)  
+> **Project Name**: Economic Intelligence RAG Assistant
 
-Example run: **Llama-3.1-8B-Instruct** on **A100 80GB** (vLLM ~0.19). Full tables and all eight feature figures plus the combined dashboard live in **[docs/RESULTS.md](docs/RESULTS.md)**. The same PNGs are in **`plots/`** (committed samples; benchmarks write there too).
+---
 
-### Throughput at a glance
+## Why this project
 
-| Feature | Peak tok/s |
-|---------|------------|
-| Continuous batching | 7,058 |
-| PagedAttention | 4,088 |
-| Quantization (AWQ best) | 2,656 |
-| CUDA graphs | 1,407 |
-| Speculative decoding (baseline) | 729 |
-| Prefix caching (APC warm) | 719 |
-| Multi-LoRA | 715 |
-| Chunked prefill | 713 |
+Economic and labor datasets are broad, sparse, and high-dimensional. This assistant provides:
 
-![Combined benchmark dashboard](plots/vllm_benchmark_linkedin.png)
+- **Retrieval groundedness**: Answers are generated *only* from retrieved chunks (or it says it cannot find enough info).
+- **Snowflake-native execution**: Data, chunking, vector search, LLM inference, evaluation, and the UI run in Snowflake.
+- **Auditable outputs**: The assistant emits a **Sources** section and the evaluation pipeline persists per-question results.
 
-## Authentication
+---
 
-```bash
-export HF_TOKEN=your_token_here   # or HUGGING_FACE_HUB_TOKEN
+## Repository contents (hackathon deliverables)
+
+These files are the required, end-to-end deliverables:
+
+- `01_CREATE_DATABASE_AND_SCHEMAS.sql` — Database, schemas, warehouse, and raw ingestion helpers
+- `01_CHUNKING_PYTHON.py` — Snowpark chunking + permanent UDF + chunk table population
+- `02_CREATE_CORTEX_SEARCH_SERVICE.sql` — Cortex Search Service definition over chunk text + attributes
+- `03_RAG_PIPELINE.sql` — Example grounded RAG query using `SNOWFLAKE.CORTEX.SEARCH_PREVIEW` + `SNOWFLAKE.CORTEX.COMPLETE`
+- `05_ECONOMIC_INTELLIGENCE_CHAT.streamlit` — Streamlit chat app that performs retrieval + grounded completion
+- `04_EVALUATION_20_QUESTIONS.sql` — 20-Q evaluation dataset + stored procedure + summary query
+- `EVAL_RESULTS.csv` — Sample evaluation outputs (generated answers + expected fields)
+
+For a cleaner write-up, see:
+
+- `ARCHITECTURE.md` — Detailed architecture, data flow, schemas, and operational notes
+
+---
+
+## Architecture overview
+
+### High-level flow
+
+1. **Ingest / build text corpus** in `ECONOMIC_RAG_DB.RAW_DATA.RAW_ECONOMIC_TEXT`  
+2. **Chunk** the text with Snowpark into `ECONOMIC_RAG_DB.CHUNKS.ECONOMIC_CHUNKS`  
+3. **Index** `CHUNK_TEXT` with a **Cortex Search Service** (`ECONOMIC_RAG_SEARCH`) using attributes for filtering/citations  
+4. **Retrieve** with `SNOWFLAKE.CORTEX.SEARCH_PREVIEW(...)`  
+5. **Generate** a grounded response with `SNOWFLAKE.CORTEX.COMPLETE('llama3.1-70b', prompt_with_context)`  
+6. **Serve** via Streamlit in Snowflake  
+7. **Evaluate** using a Snowflake Python stored procedure that runs the same retrieval + completion loop over 20 questions
+
+### Key design choices (technical depth)
+
+- **Snowflake-native chunking**: A **permanent Snowpark UDF** (`CHUNK_TEXT_SNOWPARK`) runs inside Snowflake, avoiding external services.
+- **Vector retrieval via Cortex Search**: `ECONOMIC_RAG_SEARCH` indexes `CHUNK_TEXT` and preserves **attributes** (`SOURCE`, `COMPANY_OR_ENTITY`, `FILING_TYPE_OR_CATEGORY`, `DATE`) for traceability.
+- **Grounded prompting**: The completion prompt strictly instructs the model to use only retrieved context and to explicitly return “I cannot find sufficient information…” when evidence is missing.
+- **Reproducible evaluation**: All evaluation artifacts (questions, generated answers, and summary SQL) are kept in-database.
+
+---
+
+## Step-by-step setup (Snowflake-only)
+
+> **Prereqs**: A Snowflake account with access to **Cortex** (Cortex Search + Cortex LLM) and permission to create databases, warehouses, and Streamlit apps.
+
+### 1) Create database, schemas, and warehouse
+
+Run:
+
+- `01_CREATE_DATABASE_AND_SCHEMAS.sql`
+
+This creates:
+
+- `ECONOMIC_RAG_DB`
+- schemas: `RAW_DATA`, `CHUNKS`
+- warehouse: `RAG_WH`
+
+### 2) Populate `RAW_ECONOMIC_TEXT`
+
+`01_CREATE_DATABASE_AND_SCHEMAS.sql` includes example inserts that build a text corpus from **Snowflake Marketplace / public datasets** by concatenating descriptive fields into `TEXT_CONTENT`.
+
+After loading, validate:
+
+- row counts by `SOURCE`
+- sample `TEXT_CONTENT`
+
+### 3) Chunk the corpus with Snowpark
+
+Run the Snowpark script:
+
+- `01_CHUNKING_PYTHON.py`
+
+It:
+
+- registers permanent UDF `CHUNK_TEXT_SNOWPARK` (stored on `@CHUNK_STAGE`)
+- creates `ECONOMIC_RAG_DB.CHUNKS.ECONOMIC_CHUNKS`
+- inserts chunked rows from `RAW_ECONOMIC_TEXT`
+
+### 4) Create the Cortex Search Service
+
+Run:
+
+- `02_CREATE_CORTEX_SEARCH_SERVICE.sql`
+
+Wait until the service is `READY`:
+
+- `SHOW CORTEX SEARCH SERVICES LIKE 'ECONOMIC_RAG_SEARCH';`
+
+### 5) Run a grounded RAG query (with citations)
+
+Run:
+
+- `03_RAG_PIPELINE.sql`
+
+It demonstrates:
+
+- a simple `SEARCH_PREVIEW` smoke test
+- a full grounded completion prompt with a “Sources:” section
+
+### 6) Launch the Streamlit app (chat UI)
+
+Use:
+
+- `05_ECONOMIC_INTELLIGENCE_CHAT.streamlit`
+
+The app:
+
+- retrieves top chunks with `SEARCH_PREVIEW`
+- builds a context block client-side (Snowpark in Streamlit)
+- generates the answer with `CORTEX.COMPLETE`
+- displays the answer + sources
+
+### 7) Run evaluation (20 questions)
+
+Run:
+
+- `04_EVALUATION_20_QUESTIONS.sql`
+
+This creates:
+
+- `EVAL_GROUND_TRUTH` (20 questions)
+- `EVAL_RESULTS` (generated outputs)
+- `RUN_RAG_EVALUATION()` stored procedure to execute the evaluation loop
+
+---
+
+## Demo questions (examples)
+
+These are representative of the included evaluation set:
+
+- “What is the unit for unemployment rate?”
+- “What is the frequency of Current Employment Statistics?”
+- “What industry has testing laboratories and services?”
+- “What does MEASUREMENT_TYPE describe?”
+- “What is the definition of RELEASE_NAME?”
+
+You can also try open-ended prompts like:
+
+- “Summarize unemployment measures for a specific population group.”
+- “Explain what seasonally adjusted means in the provided datasets.”
+
+---
+
+## Evaluation results (summary)
+
+Using the included `EVAL_RESULTS.csv` and the evaluation SQL’s match heuristic (generated answer contains expected answer **or** expected entity):
+
+- **Total questions**: 20  
+- **Correct**: 17  
+- **Retrieval/answer precision (heuristic)**: **85.00%**  
+- **Misses**: Q6, Q9, Q17
+
+> Note: This metric is intentionally simple and judge-friendly. See `04_EVALUATION_20_QUESTIONS.sql` for the exact computation and how results are persisted in `EVAL_RESULTS`.
+
+---
+
+## Live demo
+
+- **Live demo link (placeholder)**: _TBD_ (add Streamlit in Snowflake app URL here)
+
+---
+
+## Tech stack
+
+- **Data platform**: Snowflake
+- **Retrieval**: Snowflake Cortex Search (`SNOWFLAKE.CORTEX.SEARCH_PREVIEW`)
+- **Generation**: Snowflake Cortex LLM (`SNOWFLAKE.CORTEX.COMPLETE`, model: `llama3.1-70b`)
+- **Chunking**: Snowpark Python + permanent UDF
+- **App**: Streamlit in Snowflake
+- **Evaluation**: Snowflake SQL + Python stored procedure (Snowpark)
+
+---
+
+## Screenshots
+
+Add screenshots under `assets/` and link them here:
+
+- `assets/screenshot_chat.png` — Chat UI + grounded answer + sources
+- `assets/screenshot_search_service_ready.png` — Cortex Search Service status = READY
+- `assets/screenshot_eval_summary.png` — Evaluation summary query output
+
+---
+
+## Suggested folder structure (clean + judge-friendly)
+
+Keep hackathon-required deliverables at repo root, and organize supporting assets like this:
+
+```text
+.
+├─ 01_CREATE_DATABASE_AND_SCHEMAS.sql
+├─ 01_CHUNKING_PYTHON.py
+├─ 02_CREATE_CORTEX_SEARCH_SERVICE.sql
+├─ 03_RAG_PIPELINE.sql
+├─ 04_EVALUATION_20_QUESTIONS.sql
+├─ 05_ECONOMIC_INTELLIGENCE_CHAT.streamlit
+├─ EVAL_RESULTS.csv
+├─ README.md
+├─ ARCHITECTURE.md
+├─ assets/
+│  ├─ screenshot_chat.png
+│  ├─ screenshot_eval_summary.png
+│  └─ screenshot_search_service_ready.png
+└─ docs/
+   ├─ DATA_MODEL.md
+   └─ TROUBLESHOOTING.md
 ```
 
-Never commit tokens. The old Colab script embedded a token; this repo uses **environment variables only**.
-
-## How to Run
-
-### Option A: Command line
-
-```bash
-git clone https://github.com/YOUR_USERNAME/vllm-inference-profiler.git
-cd vllm-inference-profiler
-pip install -r requirements.txt
-
-# Run all 8 benchmarks (long; loads multiple models)
-python run_all.py
-
-# Run a single feature (1–8)
-python run_single.py --feature 3
-
-# Regenerate plot from saved JSON only
-python run_single.py --feature 3 --plot-only
-
-# Combined LinkedIn-style dashboard (needs all eight result JSON files)
-python dashboard.py
-```
-
-## Configuration
-
-All parameters are centralized in `config.py`. Edit this file to customize benchmarks for your setup.
-
-### Global Settings
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `MODEL_ID` | `meta-llama/Llama-3.1-8B-Instruct` | Base model to benchmark |
-| `GPU_MEMORY_UTIL` | `0.85` | Fraction of GPU RAM for model + KV cache |
-| `MAX_MODEL_LEN` | `8192` | Max total sequence length |
-| `BENCH_RUNS` | `3` | Measurement iterations (median taken) |
-| `WARMUP_RUNS` | `1` | Warmup iterations before measuring |
-| `MAX_TOKENS` | `128` | Default max output tokens (PagedAttention, Continuous Batching) |
-
-Additional sampling caps (defaults match the original notebook) live in `config.py`: `PREFIX_CACHE_MAX_TOKENS`, `CHUNKED_PREFILL_MAX_TOKENS`, `CUDA_GRAPHS_MAX_TOKENS`, `SPEC_DECODE_MAX_TOKENS`, `QUANTIZATION_MAX_TOKENS`, `LORA_MAX_TOKENS`. The CLI flag `--max-tokens` sets **all** of these, plus `MAX_TOKENS`, to the same value.
-
-### Feature-Specific Settings
-
-| Parameter | Default | Used By |
-|-----------|---------|---------|
-| `BATCH_SIZES` | `[1, 4, 8, 16, 32, 64]` | PagedAttention |
-| `CB_BATCH_SIZES` | `[1, 2, 4, 8, 16, 32, 64, 128]` | Continuous Batching |
-| `SHARED_PREFIX` | Long system + few-shot prefix | Prefix Caching |
-| `CHUNK_SIZES` | `[512, 1024, 2048, 4096]` | Chunked Prefill |
-| `CG_BATCH_SIZES` | `[1, 4, 8, 16, 32]` | CUDA Graphs |
-| `DRAFT_MODEL` | `meta-llama/Llama-3.2-1B-Instruct` | Speculative Decoding |
-| `SPEC_K_VALUES` | `[5, 3]` | Speculative Decoding |
-| `QUANT_CONFIGS` | BF16, FP8, AWQ, GPTQ | Quantization |
-| `MAX_LORAS` | `4` | Multi-LoRA |
-| `LORA_RANK` | `64` | Multi-LoRA |
-
-### Command Line Overrides
-
-Override config without editing files:
-
-```bash
-python run_single.py --feature paged_attention --model Qwen/Qwen2.5-7B-Instruct --batch-sizes 1,8,32,128
-python run_single.py --feature quantization --quant-methods fp8,awq --gpu-mem 0.70
-python run_single.py --feature speculative_decoding --draft-model meta-llama/Llama-3.2-1B-Instruct --spec-tokens 3,5,7
-python run_single.py --feature chunked_prefill --chunk-sizes 256,512,1024,2048,4096 --max-len 4096
-python run_single.py --feature multi_lora --max-loras 8 --lora-rank 32
-python run_single.py --feature cuda_graphs --max-tokens 256 --runs 5 --warmup 2
-python run_all.py --model Qwen/Qwen2.5-7B-Instruct --gpu-mem 0.70
-python run_all.py --skip speculative_decoding
-python run_all.py --plot-only
-```
-
-`--feature` accepts a number `1`–`8` or a name such as `paged_attention`, `cuda_graphs`, `quantization`.
-
-### Option B: Google Colab
-
-1. Upload or clone this repository into the Colab runtime.
-2. Set runtime to an A100 (or similar) GPU.
-3. Open `notebooks/vLLM_Feature_Benchmark_Dashboard.ipynb` and run the cells (install → token → `run_all.py`).
-
-## Layout
-
-| Path | Role |
-|------|------|
-| `config.py` | Model IDs, GPU settings, dark/light plot themes, quantization table |
-| `utils.py` | Engine cleanup, timing, `save_results` / `load_results` |
-| `benchmarks/b0X_*.py` | One feature each: `run_benchmark()` + `plot_results()` |
-| `results/*.json` | Serialized metrics; **sample** `01_`…`08_*.json` are committed; new runs overwrite locally |
-| `plots/*.png` | Per-feature charts + `vllm_benchmark_linkedin.png`; **sample** PNGs committed; regenerate with benchmarks |
-| `docs/FEATURES.md` | Short explanation of each benchmark |
-| `docs/TROUBLESHOOTING.md` | Common vLLM 0.19.x issues and fixes |
-| `docs/RESULTS.md` | Sample metrics + figures linked from `plots/` |
+---
 
 ## License
 
-MIT — see `LICENSE`.
+Add your preferred license file (e.g., MIT) if required by the hackathon rules.
+

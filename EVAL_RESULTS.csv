@@ -1,0 +1,113 @@
+QUESTION_ID,QUESTION,EXPECTED_ANSWER,EXPECTED_ENTITIES,GENERATED_ANSWER
+1,What is the measure for civilian labor force?,Civilian Labor Force,Civilian Labor Force,"The measure for civilian labor force varies depending on the specific dataset. However, based on the provided context, the measures for civilian labor force include:
+
+* Percent of civilian labor force unemployed 15 weeks and over (U-1)
+* Percentage of Veterans in the Civilian Labor Force, 18 years and over
+* Average Hours At Work For Civilian Labor Force Men
+* Average Hours At Work For Civilian Labor Force Women
+
+These measures are used to track different aspects of the civilian labor force, including unemployment rates, veteran participation, and average working hours.
+
+Sources:
+Current Population Survey (CPS)"
+2,What is the unit for unemployment rate?,Percent,Unemployment Rate,"The unit for unemployment rate is Percent.
+
+Sources:
+Current Population Survey (CPS)"
+3,What is PCE Price Index for energy goods and services?,"Price Index (Percent change, year ago)",Energy goods and services,"I cannot find sufficient information in the dataset.
+
+The provided context does not mention the PCE (Personal Consumption Expenditures) Price Index for energy goods and services. The context appears to be related to employment statistics, specifically indexes of aggregate weekly hours and payrolls for various industries.
+
+Sources:
+None relevant to the question."
+4,What is the frequency of Current Employment Statistics?,Monthly,Current Employment Statistics (National),"The frequency of Current Employment Statistics is monthly.
+
+Sources:
+Current Employment Statistics (National)"
+5,What is seasonally adjusted data?,Indicates whether the value is seasonally adjusted,Seasonally Adjusted,"Seasonally adjusted data refers to economic data that has been adjusted to account for regular fluctuations that occur at specific times of the year. These fluctuations can be caused by various factors such as holidays, weather patterns, and cultural events. Seasonal adjustments are made to remove these regular fluctuations, allowing for a more accurate comparison of data over time.
+
+In the context of the provided dataset, seasonally adjusted data is indicated by the label ""Seasonally adjusted"" in the ""Seasonally Adjusted"" field. This means that the data has been adjusted to account for regular seasonal fluctuations, providing a more accurate representation of the underlying trends.
+
+Sources:
+The information provided in the dataset, specifically the ""Seasonally Adjusted"" field in each entry."
+6,What is the measure for personal consumption expenditures?,Personal consumption expenditures (PCE),PCE,"I cannot find sufficient information in the dataset.
+
+The provided context does not mention personal consumption expenditures. The data appears to be related to employment statistics, including aggregate weekly payrolls, indexes of aggregate weekly hours, and employment percentages by industry.
+
+Sources:
+None relevant to the question."
+7,What is the unit for average weekly earnings?,USD per week,Average weekly earnings,"The unit for average weekly earnings varies across different industries and datasets. However, based on the provided context, the units are:
+
+* 1982-1984 USD per week (for industries such as Durable Goods, Investment Banking And Securities Intermediation, Portfolio Management And Investment Advice, and Collection Agencies)
+* USD per week (for industries such as Newspaper Publishers and Automotive Mechanical And Electrical Repair And Maintenance)
+
+Sources:
+Current Employment Statistics (National) datasets for various industries."
+8,What industry has testing laboratories and services?,Testing Laboratories And Services,Testing Laboratories And Services,"The industry that has testing laboratories and services is the Testing Laboratories And Services industry.
+
+Sources:
+Current Employment: Aggregate weekly hours of production and nonsupervisory employees, testing laboratories and services, Monthly (Seasonally adjusted)
+Current Employment: Average hourly earnings of all employees, 1982-1984 dollars, testing laboratories and services, Monthly (Seasonally adjusted)
+Current Employment: Aggregate weekly hours of production and nonsupervisory employees, testing laboratories and services, Monthly (Not seasonally adjusted)
+Current Employment: Average weekly earnings of production and nonsupervisory employees, 1982-84 dollars, testing laboratories and services, Monthly (Seasonally adjusted)"
+9,What is the release name for PCE Price Index?,Personal Consumption Expenditures Price Index,Personal Consumption Expenditures Price Index,"I cannot find sufficient information in the dataset.
+
+Sources:
+The provided context does not mention the PCE Price Index, and therefore, I am unable to determine the release name for it."
+10,What is the definition of VARIABLE_NAME?,Human-readable unique name for the variable.,VARIABLE_NAME,"I cannot find sufficient information in the dataset.
+
+The provided context does not contain a definition for ""VARIABLE_NAME"". The context appears to be a collection of metadata for various economic indicators, but it does not provide a definition for a specific variable named ""VARIABLE_NAME"".
+
+Sources:
+None"
+11,What is the frequency for annual labor force data?,Annual,Annual,"The frequency for annual labor force data is Annual.
+
+Sources:
+Current Population Survey (CPS)"
+12,What is the measure for unemployment?,Unemployment,Unemployment,"The measure for unemployment is the percentage of unemployed individuals within a specific group, such as by age, duration of unemployment, or demographic characteristics.
+
+Sources:
+Current Population Survey (CPS)"
+13,What is the unit for labor force participation rate?,Percent,Labor Force Participation,"I cannot find sufficient information in the dataset.
+
+The provided context does not mention the unit for labor force participation rate. The units mentioned in the context are all related to specific employment measures, such as ""Percent of total at work"", ""Percent of at work in all nonagri industries"", and ""Percent of employed within group"", but none of them specifically refer to labor force participation rate.
+
+Sources:
+None"
+14,What is the release for Current Population Survey?,Current Population Survey (CPS),Current Population Survey (CPS),"The release for Current Population Survey (CPS) is mentioned in all the provided texts, but the specific release is not explicitly stated. However, based on the context, it can be inferred that the release is a regular, periodic publication, likely on a quarterly or monthly basis, as indicated by the frequency of the data.
+
+Sources:
+Current Population Survey (CPS)"
+15,What does MEASUREMENT_TYPE describe?,Details how the variable was measured or calculated,MEASUREMENT_TYPE,"MEASUREMENT_TYPE describes the type of measurement used to quantify the data. It provides information on how the data is being measured, such as ""Quarterly averages"", ""Percent of employed by occupation"", ""Aggregate weekly hours"", ""YoY Percent Change"", or ""Diffusion index, 1-month span"". This helps to clarify the nature of the data and how it is being presented.
+
+Sources:
+Current Employment Statistics (National), Current Population Survey (CPS), Monthly State Retail Sales"
+16,What is the industry for general medical and surgical hospitals?,General Medical And Surgical Hospitals,General Medical And Surgical Hospitals,"The industry for general medical and surgical hospitals is General Medical And Surgical Hospitals.
+
+Sources:
+Current Employment: Average weekly hours of all employees, general medical and surgical hospitals, Monthly (Seasonally adjusted)
+Current Employment: Average weekly hours of production and nonsupervisory employees, general medical and surgical hospitals, Monthly (Not seasonally adjusted)
+Current Employment: Average weekly earnings of production and nonsupervisory employees, general medical and surgical hospitals, Monthly (Seasonally adjusted)
+Current Employment: Average weekly earnings of all employees, general medical and surgical hospitals, Monthly (Not seasonally adjusted)
+Current Employment: Aggregate weekly payrolls of production and nonsupervisory employees, general medical and surgical hospitals, Monthly (Not seasonally adjusted)"
+17,What is the seasonally adjusted status for most monthly data?,Seasonally adjusted or Not seasonally adjusted,SEASONALLY_ADJUSTED,"Based on the provided context, it appears that most of the monthly data is seasonally adjusted. Out of the 8 datasets mentioned, 5 are seasonally adjusted, while 3 are not seasonally adjusted.
+
+Sources:
+Current Employment Statistics (National) datasets"
+18,What is the unit for count data in employment?,Count,Count,"The unit for count data in employment is Count.
+
+Sources:
+Current Employment Statistics (National)"
+19,What is the measure for price index?,Price Index,Price Index,"I cannot find sufficient information in the dataset.
+
+The provided context does not mention a price index. All the mentioned measures are related to indexes of aggregate weekly payrolls or aggregate weekly hours of production and nonsupervisory employees.
+
+Sources:
+None"
+20,What is the definition of RELEASE_NAME?,The individual report or collection of data in which the data was released.,RELEASE_NAME,"Based on the provided context, RELEASE_NAME refers to the name of the data release or publication from which the employment statistics are sourced.
+
+In the context, RELEASE_NAME is mentioned in each data point, and it appears to be the name of the dataset or publication that the data is derived from. The values for RELEASE_NAME include ""Current Employment Statistics (National)"" and ""Current Population Survey (CPS)"".
+
+Sources:
+- Current Employment Statistics (National)
+- Current Population Survey (CPS)"

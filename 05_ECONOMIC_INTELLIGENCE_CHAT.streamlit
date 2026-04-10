@@ -1,0 +1,73 @@
+import streamlit as st
+import snowflake.snowpark as snowpark
+import json
+
+st.set_page_config(page_title="Economic Intelligence Assistant", layout="wide")
+st.title("💼 Economic Intelligence RAG Assistant")
+st.caption("Grounded answers from Finance & Economics Marketplace data | Arctic Embed + Cortex")
+
+# Initialize
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if "session" not in st.session_state:
+    st.session_state.session = snowpark.Session.builder.getOrCreate()
+
+# Sidebar
+with st.sidebar:
+    st.header("📚 Source Citations")
+    st.caption("All answers are fully grounded")
+
+# Show chat history
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+# User input
+if prompt := st.chat_input("Ask about unemployment, PCE, labor force, indicators..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        with st.spinner("Searching dataset + generating answer..."):
+            
+            # Step 1: Get search results (JSON)
+            escaped = prompt.replace('"', '\\"')
+            search_json = st.session_state.session.sql(f"""
+                SELECT SNOWFLAKE.CORTEX.SEARCH_PREVIEW(
+                    'ECONOMIC_RAG_SEARCH', 
+                    '{{"query": "{escaped}", "limit": 8}}'
+                ) AS JSON_RESULT
+            """).collect()[0]['JSON_RESULT']
+
+            # Step 2: Build context in Python
+            results = json.loads(search_json).get('results', [])
+            context = ""
+            for r in results:
+                context += f"SOURCE: {r.get('ATTRIBUTES', {}).get('SOURCE', '')}\n"
+                context += f"ENTITY: {r.get('ATTRIBUTES', {}).get('COMPANY_OR_ENTITY', '')}\n"
+                context += f"TEXT: {r.get('CHUNK_TEXT', '')}\n---\n"
+
+            # Step 3: Generate final answer
+            full_prompt = f"""You are an expert economic intelligence assistant.
+
+Use ONLY the context below to answer the question.
+If you cannot answer from the context, say "I cannot find sufficient information in the dataset."
+
+=== CONTEXT ===
+{context}
+=== QUESTION ===
+{prompt}
+
+Answer in clear, professional English.
+At the very end add a section called "Sources:"."""
+
+            result = st.session_state.session.sql(f"""
+                SELECT SNOWFLAKE.CORTEX.COMPLETE('llama3.1-70b', '{full_prompt.replace("'", "''")}') AS ANSWER
+            """).collect()[0]['ANSWER']
+
+            st.markdown(result)
+            st.session_state.messages.append({"role": "assistant", "content": result})
+
+st.success("✅ Connected to RAG pipeline")

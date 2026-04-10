@@ -52,6 +52,42 @@ For a cleaner write-up, see:
 6. **Serve** via Streamlit in Snowflake  
 7. **Evaluate** using a Snowflake Python stored procedure that runs the same retrieval + completion loop over 20 questions
 
+### Architecture diagram
+
+```mermaid
+flowchart LR
+  subgraph Snowflake["Snowflake Account"]
+    subgraph RAW["ECONOMIC_RAG_DB.RAW_DATA"]
+      RAWT["RAW_ECONOMIC_TEXT\n(SOURCE, ENTITY, CATEGORY, DATE, TEXT_CONTENT)"]
+    end
+
+    subgraph CH["ECONOMIC_RAG_DB.CHUNKS"]
+      UDF["Snowpark Permanent UDF\nCHUNK_TEXT_SNOWPARK (@CHUNK_STAGE)"]
+      CHUNKS["ECONOMIC_CHUNKS\n(CHUNK_TEXT + attributes)"]
+    end
+
+    CSS["Cortex Search Service\nECONOMIC_RAG_SEARCH\n(index: CHUNK_TEXT)"]
+    SEARCH["SNOWFLAKE.CORTEX.SEARCH_PREVIEW\n(top‑k JSON results)"]
+    LLM["SNOWFLAKE.CORTEX.COMPLETE\n(model: llama3.1-70b)\n(grounded answer + Sources)"]
+
+    subgraph APP["Streamlit in Snowflake"]
+      UI["Economic Intelligence Chat UI\n(conversation history)"]
+    end
+
+    subgraph EVAL["Evaluation"]
+      GT["EVAL_GROUND_TRUTH\n(20 questions)"]
+      SP["RUN_RAG_EVALUATION()\n(Python stored procedure)"]
+      RES["EVAL_RESULTS\n(generated answers)"]
+      REP["Precision Summary Query\n(heuristic match)"]
+    end
+  end
+
+  RAWT --> UDF --> CHUNKS --> CSS --> SEARCH --> LLM --> UI
+  GT --> SP --> RES --> REP
+  SP --> SEARCH
+  SP --> LLM
+```
+
 ### Key design choices (technical depth)
 
 - **Snowflake-native chunking**: A **permanent Snowpark UDF** (`CHUNK_TEXT_SNOWPARK`) runs inside Snowflake, avoiding external services.
@@ -200,32 +236,6 @@ Add screenshots under `assets/` and link them here:
 - `assets/screenshot_chat.png` — Chat UI + grounded answer + sources
 - `assets/screenshot_search_service_ready.png` — Cortex Search Service status = READY
 - `assets/screenshot_eval_summary.png` — Evaluation summary query output
-
----
-
-## Suggested folder structure (clean + judge-friendly)
-
-Keep hackathon-required deliverables at repo root, and organize supporting assets like this:
-
-```text
-.
-├─ 01_CREATE_DATABASE_AND_SCHEMAS.sql
-├─ 01_CHUNKING_PYTHON.py
-├─ 02_CREATE_CORTEX_SEARCH_SERVICE.sql
-├─ 03_RAG_PIPELINE.sql
-├─ 04_EVALUATION_20_QUESTIONS.sql
-├─ 05_ECONOMIC_INTELLIGENCE_CHAT.streamlit
-├─ EVAL_RESULTS.csv
-├─ README.md
-├─ ARCHITECTURE.md
-├─ assets/
-│  ├─ screenshot_chat.png
-│  ├─ screenshot_eval_summary.png
-│  └─ screenshot_search_service_ready.png
-└─ docs/
-   ├─ DATA_MODEL.md
-   └─ TROUBLESHOOTING.md
-```
 
 ---
 

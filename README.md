@@ -218,6 +218,12 @@ Using the included `EVAL_RESULTS.csv` and the evaluation SQL’s match heuristic
 
 ---
 
+## Dataset
+
+- **Snowflake Marketplace dataset used**: Snowflake Data Marketplace — **Finance & Economics**
+
+---
+
 ## Tech stack
 
 - **Data platform**: Snowflake
